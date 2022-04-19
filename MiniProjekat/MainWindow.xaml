@@ -6,7 +6,41 @@
         xmlns:local="clr-namespace:MiniProjekat"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+    <Grid Height="36" VerticalAlignment="Top" Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0" Grid.Column="0" Content="Draw data" Margin="2"
+                Background="#5a7bfb" BorderBrush="Transparent"
+                Foreground="White">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <Button Grid.Row="0" Grid.Column="1" Content="Clear data" Margin="2"
+                Background="#5a7bfb" BorderBrush="Transparent"
+                Foreground="White">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <ComboBox Grid.Row="0" Grid.Column="2" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
+                  Background="White" IsEditable="True" IsReadOnly="True" Text="Data reference">
+            <ComboBoxItem>GDP</ComboBoxItem>
+            <ComboBoxItem>Treasury Yields</ComboBoxItem>
+        </ComboBox>
+        <ComboBox Grid.Row="0" Grid.Column="3" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
+                  Background="White" IsEditable="True" IsReadOnly="True" Text="Interval">
+            <ComboBoxItem>Daily</ComboBoxItem>
+            <ComboBoxItem>Monthly</ComboBoxItem>
+            <ComboBoxItem>Quarterly</ComboBoxItem>
+        </ComboBox>
     </Grid>
 </Window>
