@@ -32,16 +32,12 @@
             <!-- ComboBoxes -->
 
             <ComboBox Grid.Row="0" Grid.Column="0" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
-                  Background="White" IsEditable="True" IsReadOnly="True" Text="Data reference" x:Name="dataReferencePicker">
-                <ComboBoxItem>GDP</ComboBoxItem>
-                <ComboBoxItem>Treasury Yields</ComboBoxItem>
+                  Background="White" IsEditable="True" IsReadOnly="True" Text="Data reference" x:Name="dataReferencePicker"
+                  SelectionChanged="UpdateIntervals">
             </ComboBox>
             <ComboBox Grid.Row="0" Grid.Column="1" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
-                  Background="White" IsEditable="True" IsReadOnly="True" Text="Interval" x:Name="intervalPicker">
-                <ComboBoxItem>Daily</ComboBoxItem>
-                <ComboBoxItem>Monthly</ComboBoxItem>
-                <ComboBoxItem>Quarterly</ComboBoxItem>
-            </ComboBox>
+                  Background="White" IsEditable="True" Text="Interval" x:Name="intervalPicker"/>
+
 
             <!-- DatePickers -->
 
@@ -87,7 +83,8 @@
             </Grid.ColumnDefinitions>
             
             <!-- Chart1 -->
-            <lvc:CartesianChart Grid.Row="1" Grid.Column="0"  Series="{Binding LineSeriesCollection}" LegendLocation="Right" >
+            <lvc:CartesianChart Grid.Row="1" Grid.Column="0"  Series="{Binding LineSeriesCollection}" LegendLocation="Right" 
+                                x:Name="series1">
                 <lvc:CartesianChart.AxisY>
                     <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                 </lvc:CartesianChart.AxisY>

@@ -22,17 +22,25 @@ namespace MiniProjekat
     /// </summary>
     public partial class MainWindow : Window
     {
-
         public SeriesCollection LineSeriesCollection { get; set; }
         public SeriesCollection ColumnSeriesCollection { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> Formatter { get; set; }
 
+        private List<String> GDPIntervals = new List<String>() { "Quarterly", "Annual" };
+        private List<String> TreasuryIntervals = new List<String>() { "Daily", "Weekly", "Monthly"};
+
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            List<String> dataReferences = new List<String>() { "GDP", "Treasury Yields" };
+            dataReferencePicker.ItemsSource = dataReferences;
+            dataReferencePicker.SelectedIndex = 0;
+
+            intervalPicker.ItemsSource = GDPIntervals;
+            intervalPicker.SelectedIndex = 0;
         }
 
         private void DrawButton_Click(object sender, RoutedEventArgs e)
@@ -42,7 +50,7 @@ namespace MiniProjekat
                 DateTime? startDate, endDate;
 
                 DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());
-                Interval interval = ParseInterval(intervalPicker.SelectedValue.ToString());
+                var interval = ParseInterval(intervalPicker.SelectedValue.ToString());
 
                 startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?) null;
                 endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now;
@@ -128,28 +136,42 @@ namespace MiniProjekat
             // show table
         }
 
+        private void UpdateIntervals(object sender, RoutedEventArgs e)
+        {
+            DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());
+            if (dataReference == DataReference.GDP)
+            {
+                intervalPicker.ItemsSource = GDPIntervals;
+                intervalPicker.SelectedIndex = 0;
+            }
+            else
+            {
+                intervalPicker.ItemsSource = TreasuryIntervals;
+                intervalPicker.SelectedIndex = 0;
+            }
 
+        }
 
         public enum DataReference
         {
             GDP, TREASURY
         }
-        public enum Interval
-        {
-            DAILY, MONTHLY, YEARLY
-        }
         public DataReference ParseDataReference(string text)
         {
             return text.ToLower().Contains("gdp") ? DataReference.GDP : DataReference.TREASURY;
         }
-        public Interval ParseInterval(string text)
+        public Enum ParseInterval(string text)
         {
             if (text.ToLower().Contains("daily"))
-                return Interval.DAILY;
+                return TREASURY_INTERVAL.DAILY;
+            else if (text.ToLower().Contains("weekly"))
+                return TREASURY_INTERVAL.WEEKLY;
             else if (text.ToLower().Contains("monthly"))
-                return Interval.MONTHLY;
+                return TREASURY_INTERVAL.MONTHLY;
+            else if (text.ToLower().Contains("quarterly"))
+                return GDP_INTERVAL.QUARTERLY;
             else
-                return Interval.YEARLY;
+                return GDP_INTERVAL.ANNUAL;
         }
     }
 }
