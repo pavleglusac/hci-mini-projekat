@@ -118,7 +118,7 @@ namespace MiniProjekat
             SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
 
             var chartValues = new ChartValues<double>();
-            var values = Data.Values.Select(x => Double.Parse(x));
+            var values = Data.Values;
             chartValues.AddRange(values);
 
             ColumnSeriesCollection = new SeriesCollection
@@ -159,7 +159,7 @@ namespace MiniProjekat
             LineSeriesCollection = new SeriesCollection();
 
             var chartValues = new ChartValues<double>();
-            var values = Data.Values.Select(x => Double.Parse(x));
+            var values = Data.Values;
             Data.Values.ForEach(x => System.Diagnostics.Debug.WriteLine(x));
             chartValues.AddRange(values);
 
