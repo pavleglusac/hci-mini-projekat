@@ -23,7 +23,7 @@ namespace MiniProjekat
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public SeriesCollection LineSeriesCollection { get; set; }
         public SeriesCollection ColumnSeriesCollection { get; set; }
@@ -37,6 +37,8 @@ namespace MiniProjekat
 
         private DataHandler dataHandler = new DataHandler();
         private DataHandler.Data Data { get; set; }
+
+        private Settings CurrentSettings { get; set; }
 
         private ZoomingOptions _zoomingMode;
         public ZoomingOptions ZoomingMode
@@ -53,7 +55,7 @@ namespace MiniProjekat
 
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
-            if (PropertyChanged != null) PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public MainWindow()
@@ -94,8 +96,21 @@ namespace MiniProjekat
                     Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
                 }
 
-                DrawCharts();
-                DrawLineChart();
+                var newSetttings = new Settings
+                {
+                    DataReference = dataReference,
+                    Interval = interval,
+                    Start = startDate,
+                    End = endDate,
+                };
+
+                if(CurrentSettings == null || !newSetttings.Equals(CurrentSettings))
+                {
+                    System.Diagnostics.Debug.Write($"{CurrentSettings} {newSetttings}");
+                    CurrentSettings = newSetttings;
+                    Clear();
+                    DrawCharts();
+                }
             }
         }
 
@@ -121,16 +136,18 @@ namespace MiniProjekat
             var values = Data.Values.Select(x => Double.Parse(x));
             chartValues.AddRange(values);
 
-            ColumnSeriesCollection = new SeriesCollection
+            if(ColumnSeriesCollection == null)
+                ColumnSeriesCollection = new SeriesCollection();
+;
+            var series = new ColumnSeries
             {
-                new ColumnSeries
-                {
-                    Title = "2015",
-                    Values = chartValues,
-                    Stroke = brush,
-                    Fill = brush
-                }
+                Title = "2015",
+                Values = chartValues,
+                Stroke = brush,
+                Fill = brush
             };
+
+            ColumnSeriesCollection.Add(series);
 
             double maxValue = values.Count() > 0 ? values.Max() : 0;
             double minValue = values.Count() > 0 ? values.Min() : 0;
@@ -155,14 +172,15 @@ namespace MiniProjekat
         {
             SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
             SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
-
-            LineSeriesCollection = new SeriesCollection();
+            
+            if(LineSeriesCollection == null)
+                LineSeriesCollection = new SeriesCollection();
 
             var chartValues = new ChartValues<double>();
             var values = Data.Values.Select(x => Double.Parse(x));
-            Data.Values.ForEach(x => System.Diagnostics.Debug.WriteLine(x));
-            chartValues.AddRange(values);
+            //Data.Values.ForEach(x => System.Diagnostics.Debug.WriteLine(x));
 
+            chartValues.AddRange(values.Select(x => (x)));
             LineSeries lineSeries = new LineSeries
             {
                 Title = "Series 3",
@@ -188,7 +206,6 @@ namespace MiniProjekat
                                 return brush;
                         });
             Charting.For<double>(mapper, SeriesOrientation.All);
-
             LineLabels = Data.Dates.ToArray();
             YFormatter = value => value.ToString("C");
         }
@@ -197,11 +214,13 @@ namespace MiniProjekat
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             // clear charts etc.
-            LineSeriesCollection = new SeriesCollection();
-            ColumnSeriesCollection = new SeriesCollection();
-            DrawChartsNoContext();
-            System.Diagnostics.Debug.WriteLine("CLICKED CLEAAR");
-            System.Diagnostics.Debug.WriteLine($"{Data.Dates.Count} {Data.Values.Count}");
+            Clear();
+        }
+
+        private void Clear()
+        {
+            LineSeriesCollection?.Clear();
+            ColumnSeriesCollection?.Clear();
         }
 
         private void TableButton_Click(object sender, RoutedEventArgs e)
@@ -246,5 +265,28 @@ namespace MiniProjekat
             else
                 return GDP_INTERVAL.ANNUAL;
         }
+
+        class Settings
+        {
+            public Enum Interval { get; set; }
+            public DataReference DataReference { get; set; }
+            public DateTime? Start { get; set; }
+            public DateTime? End { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Settings settings &&
+                       EqualityComparer<Enum>.Default.Equals(Interval, settings.Interval) &&
+                       DataReference == settings.DataReference &&
+                       Start == settings.Start &&
+                       End == settings.End;
+            }
+
+            public override string ToString()
+            {
+                return $"{Interval} {DataReference} {Start} {End}";
+            }
+        }
+
     }
 }
