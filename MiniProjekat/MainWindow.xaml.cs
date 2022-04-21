@@ -14,6 +14,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LiveCharts.Configurations;
+using LiveCharts.Defaults;
+using System.ComponentModel;
 
 namespace MiniProjekat
 {
@@ -24,12 +27,34 @@ namespace MiniProjekat
     {
         public SeriesCollection LineSeriesCollection { get; set; }
         public SeriesCollection ColumnSeriesCollection { get; set; }
-        public string[] Labels { get; set; }
+        public string[] LineLabels { get; set; }
+        public string[] ColumnLabels { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> Formatter { get; set; }
 
         private List<String> GDPIntervals = new List<String>() { "Quarterly", "Annual" };
         private List<String> TreasuryIntervals = new List<String>() { "Daily", "Weekly", "Monthly"};
+
+        private DataHandler dataHandler = new DataHandler();
+        private DataHandler.Data Data { get; set; }
+
+        private ZoomingOptions _zoomingMode;
+        public ZoomingOptions ZoomingMode
+        {
+            get { return _zoomingMode; }
+            set
+            {
+                _zoomingMode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName = null)
+        {
+            if (PropertyChanged != null) PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public MainWindow()
         {
@@ -41,6 +66,7 @@ namespace MiniProjekat
 
             intervalPicker.ItemsSource = GDPIntervals;
             intervalPicker.SelectedIndex = 0;
+            ZoomingMode = ZoomingOptions.Xy;
         }
 
         private void DrawButton_Click(object sender, RoutedEventArgs e)
@@ -59,6 +85,15 @@ namespace MiniProjekat
                 Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
+                if(dataReference == DataReference.GDP)
+                {
+                    Data = dataHandler.getGDP((GDP_INTERVAL)interval);
+                }
+                else
+                {
+                    Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
+                }
+
                 DrawCharts();
                 DrawLineChart();
             }
@@ -71,64 +106,102 @@ namespace MiniProjekat
             DataContext = this;
         }
 
+        private void DrawChartsNoContext()
+        {
+            DrawLineChart();
+            DrawColumnChart();
+        }
+
         private void DrawColumnChart()
         {
             SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
+            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
+
+            var chartValues = new ChartValues<double>();
+            var values = Data.Values.Select(x => Double.Parse(x));
+            chartValues.AddRange(values);
 
             ColumnSeriesCollection = new SeriesCollection
             {
                 new ColumnSeries
                 {
                     Title = "2015",
-                    Values = new ChartValues<double> { 10, 50, 39, 50, 37, 28, 15 },
+                    Values = chartValues,
                     Stroke = brush,
                     Fill = brush
                 }
             };
-          
-            //ColumnSeriesCollection[1].Values.Add(48d);
 
-            Labels = new[] { "Maria", "Susan", "Charles", "Frida" };
-            Formatter = value => value.ToString("N");
+            double maxValue = values.Count() > 0 ? values.Max() : 0;
+            double minValue = values.Count() > 0 ? values.Min() : 0;
+
+            var mapper = new CartesianMapper<double>()
+                        .X((value, index) => index)
+                        .Y((value) => value)
+                        .Fill((value, index) =>
+                        {
+                            if ((value == maxValue) || (value == minValue))
+                                return brushMax;
+                            else
+                                return brush;
+                        });
+
+
+            ColumnLabels = Data.Dates.ToArray();
+            Formatter = value => value.ToString("C");
         }
 
         private void DrawLineChart()
         {
             SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
+            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
 
-            LineSeriesCollection = new SeriesCollection
+            LineSeriesCollection = new SeriesCollection();
+
+            var chartValues = new ChartValues<double>();
+            var values = Data.Values.Select(x => Double.Parse(x));
+            Data.Values.ForEach(x => System.Diagnostics.Debug.WriteLine(x));
+            chartValues.AddRange(values);
+
+            LineSeries lineSeries = new LineSeries
             {
-                new LineSeries
-                {
-                    Title = "Series 3",
-                    Values = new ChartValues<double> { 4,2,7,2,7 },
-                    PointGeometry = DefaultGeometries.Square,
-                    PointGeometrySize = 15,
-                    Stroke = brush
-                }
+                Title = "Series 3",
+                Values = chartValues,
+                PointGeometry = DefaultGeometries.Square,
+                PointGeometrySize = 15,
+                Stroke = brush
             };
 
-            Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" };
+            LineSeriesCollection.Add(lineSeries);
+
+            double maxValue = values.Count() > 0 ? values.Max() : 0;
+            double minValue = values.Count() > 0 ? values.Min() : 0;
+
+            var mapper = new CartesianMapper<double>()
+                        .X((value, index) => index)
+                        .Y((value) => value)
+                        .Fill((value, index) =>
+                        {
+                            if ((value == maxValue) || (value == minValue))
+                                return brushMax;
+                            else
+                                return brush;
+                        });
+            Charting.For<double>(mapper, SeriesOrientation.All);
+
+            LineLabels = Data.Dates.ToArray();
             YFormatter = value => value.ToString("C");
-
-            /*
-            LineSeriesCollection.Add(new LineSeries
-            {
-                Title = "Series 4",
-                Values = new ChartValues<double> { 5, 3, 2, 4 },
-                LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                PointGeometry = Geometry.Parse("m 25 70.36218 20 -28 -20 22 -8 -6 z"),
-                PointGeometrySize = 50,
-                PointForeground = Brushes.Gray
-            }); 
-            */
-
-            // LineSeriesCollection[3].Values.Add(5d);
         }
+
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             // clear charts etc.
+            LineSeriesCollection = new SeriesCollection();
+            ColumnSeriesCollection = new SeriesCollection();
+            DrawChartsNoContext();
+            System.Diagnostics.Debug.WriteLine("CLICKED CLEAAR");
+            System.Diagnostics.Debug.WriteLine($"{Data.Dates.Count} {Data.Values.Count}");
         }
 
         private void TableButton_Click(object sender, RoutedEventArgs e)
