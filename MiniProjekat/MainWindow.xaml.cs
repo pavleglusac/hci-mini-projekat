@@ -81,21 +81,13 @@ namespace MiniProjekat
                 var interval = ParseInterval(intervalPicker.SelectedValue.ToString());
 
                 startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?) null;
-                endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now;
+                endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now.Date;
 
                 Console.Out.WriteLine(dataReference + " " + interval);
                 Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
-                if(dataReference == DataReference.GDP)
-                {
-                    Data = dataHandler.getGDP((GDP_INTERVAL)interval);
-                }
-                else
-                {
-                    Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
-                }
-
+                
                 var newSetttings = new Settings
                 {
                     DataReference = dataReference,
@@ -106,11 +98,31 @@ namespace MiniProjekat
 
                 if(CurrentSettings == null || !newSetttings.Equals(CurrentSettings))
                 {
+                    ComputeData(dataReference, interval);
                     System.Diagnostics.Debug.Write($"{CurrentSettings} {newSetttings}");
                     CurrentSettings = newSetttings;
                     Clear();
                     DrawCharts();
                 }
+                else
+                {
+                    if(LineSeriesCollection.Count == 0)
+                    {
+                        DrawCharts();
+                    }
+                }
+            }
+        }
+
+        private void ComputeData(DataReference dataReference, Enum interval)
+        {
+            if (dataReference == DataReference.GDP)
+            {
+                Data = dataHandler.getGDP((GDP_INTERVAL)interval);
+            }
+            else
+            {
+                Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
             }
         }
 
@@ -178,10 +190,8 @@ namespace MiniProjekat
 
             var chartValues = new ChartValues<double>();
             var values = Data.Values;
-            Data.Values.ForEach(x => System.Diagnostics.Debug.WriteLine(x));
             chartValues.AddRange(values);
 
-            chartValues.AddRange(values.Select(x => (x)));
             LineSeries lineSeries = new LineSeries
             {
                 Title = "Series 3",
