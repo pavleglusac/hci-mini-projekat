@@ -39,6 +39,7 @@ namespace MiniProjekat
                 dynamic json_data = js.Deserialize(client.DownloadString(queryUri), typeof(object));
 
                 Data data = new Data();
+                Double value;
                 if (!json_data.ContainsKey("data"))
                 {
                     return null;
@@ -46,7 +47,11 @@ namespace MiniProjekat
                 foreach (var dateValuePair in json_data["data"])
                 {
                     data.Dates.Add(dateValuePair["date"]);
-                    data.Values.Add(dateValuePair["value"]);
+                    if (!Double.TryParse(dateValuePair["value"], out value))
+                    {
+                        value = 0;
+                    }
+                    data.Values.Add(value);
                 }
                 return data;
             }
@@ -62,7 +67,7 @@ namespace MiniProjekat
             {
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 dynamic json_data = js.Deserialize(client.DownloadString(queryUri), typeof(object));
-
+                Double value;
                 Data data = new Data();
                 if (!json_data.ContainsKey("data"))
                 {
@@ -71,7 +76,11 @@ namespace MiniProjekat
                 foreach (var dateValuePair in json_data["data"])
                 {
                     data.Dates.Add(dateValuePair["date"]);
-                    data.Values.Add(dateValuePair["value"]);
+                    if (!Double.TryParse(dateValuePair["value"], out value))
+                    {
+                        value = 0;
+                    }
+                    data.Values.Add(value);
                 }
                 return data;
             }
@@ -79,12 +88,12 @@ namespace MiniProjekat
         public class Data
         {
             public List<string> Dates { get; set; }
-            public List<string> Values { get; set; }
+            public List<Double> Values { get; set; }
 
             public Data()
             {
                 Dates = new List<string>();
-                Values = new List<string>();
+                Values = new List<Double>();
             }
         }
 
