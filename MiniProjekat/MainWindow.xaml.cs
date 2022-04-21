@@ -138,16 +138,11 @@ namespace MiniProjekat
             DataContext = this;
         }
 
-        private void DrawChartsNoContext()
-        {
-            DrawLineChart();
-            DrawColumnChart();
-        }
-
         private void DrawColumnChart()
         {
             SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
             SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
+            SolidColorBrush brushLight = (SolidColorBrush)new BrushConverter().ConvertFrom("#9caffc");
 
             var chartValues = new ChartValues<double>();
             var values = Data.Values;
@@ -160,8 +155,9 @@ namespace MiniProjekat
             {
                 Title = CurrentSettings.DataReference.ToString() + "\n" + CurrentSettings.Interval.ToString(),
                 Values = chartValues,
-                Stroke = brush,
-                Fill = brush
+                Stroke = brushLight,
+                Fill = brushLight,
+                StrokeThickness = 2,
             };
 
             ColumnSeriesCollection.Add(series);
@@ -173,6 +169,13 @@ namespace MiniProjekat
                         .X((value, index) => index)
                         .Y((value) => value)
                         .Fill((value, index) =>
+                        {
+                            if ((value == maxValue) || (value == minValue))
+                                return brushMax;
+                            else
+                                return brushLight;
+                        })
+                        .Stroke((value, index) =>
                         {
                             if ((value == maxValue) || (value == minValue))
                                 return brushMax;
@@ -220,11 +223,19 @@ namespace MiniProjekat
                                 return brushMax;
                             else
                                 return brush;
+                        })
+                        .Stroke((value, index) =>
+                        {
+                            if ((value == maxValue) || (value == minValue))
+                                return brushMax;
+                            else
+                                return brush;
                         });
             Charting.For<double>(mapper, SeriesOrientation.All);
             LineLabels = Data.Dates.ToArray();
             YFormatter = value => value.ToString("C");
         }
+
 
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
