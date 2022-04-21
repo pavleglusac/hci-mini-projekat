@@ -51,6 +51,8 @@ namespace MiniProjekat
             }
         }
 
+        private readonly int MAX_ENTRIES = 20;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName = null)
@@ -124,6 +126,9 @@ namespace MiniProjekat
             {
                 Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
             }
+
+            Data.Values = Data.Values.Take(MAX_ENTRIES).ToList();
+            Data.Dates = Data.Dates.Take(MAX_ENTRIES).ToList();
         }
 
         private void DrawCharts()
@@ -153,7 +158,7 @@ namespace MiniProjekat
 ;
             var series = new ColumnSeries
             {
-                Title = "2015",
+                Title = CurrentSettings.DataReference.ToString() + "\n" + CurrentSettings.Interval.ToString(),
                 Values = chartValues,
                 Stroke = brush,
                 Fill = brush
@@ -194,10 +199,10 @@ namespace MiniProjekat
 
             LineSeries lineSeries = new LineSeries
             {
-                Title = "Series 3",
+                Title = CurrentSettings.DataReference.ToString() + "\n" + CurrentSettings.Interval.ToString(),
                 Values = chartValues,
                 PointGeometry = DefaultGeometries.Square,
-                PointGeometrySize = 15,
+                PointGeometrySize = 10,
                 Stroke = brush
             };
 

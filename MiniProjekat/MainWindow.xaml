@@ -84,22 +84,23 @@
             
             <!-- Chart1 -->
             <lvc:CartesianChart Grid.Row="1" Grid.Column="0"  Series="{Binding LineSeriesCollection}" LegendLocation="Right" 
-                                x:Name="series1" Zoom="{Binding ZoomingMode}">
+                                x:Name="series1" Zoom="{Binding ZoomingMode}" Margin="5">
                 <lvc:CartesianChart.AxisY>
-                    <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                    <lvc:Axis Title="$" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                 </lvc:CartesianChart.AxisY>
                 <lvc:CartesianChart.AxisX>
-                    <lvc:Axis Title="Month" Labels="{Binding LineLabels}"></lvc:Axis>
+                    <lvc:Axis Title="Date" Labels="{Binding LineLabels}"></lvc:Axis>
                 </lvc:CartesianChart.AxisX>
             </lvc:CartesianChart>
 
             <!-- Chart2 -->
-            <lvc:CartesianChart Grid.Row="1" Grid.Column="1"  Series="{Binding ColumnSeriesCollection}" LegendLocation="Right" Zoom="{Binding ZoomingMode}">
+            <lvc:CartesianChart Grid.Row="1" Grid.Column="1"  Series="{Binding ColumnSeriesCollection}" 
+                                LegendLocation="Right" Zoom="{Binding ZoomingMode}" Margin="5">
                 <lvc:CartesianChart.AxisX>
-                    <lvc:Axis Title="Salesman" Labels="{Binding ColumnLabels}"></lvc:Axis>
+                    <lvc:Axis Title="Date" Labels="{Binding ColumnLabels}"></lvc:Axis>
                 </lvc:CartesianChart.AxisX>
                 <lvc:CartesianChart.AxisY>
-                    <lvc:Axis Title="Sold Apps" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                    <lvc:Axis Title="$" LabelFormatter="{Binding Formatter}"></lvc:Axis>
                 </lvc:CartesianChart.AxisY>
             </lvc:CartesianChart>
 
