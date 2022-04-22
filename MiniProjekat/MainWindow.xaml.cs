@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace MiniProjekat
 {
@@ -27,13 +28,13 @@ namespace MiniProjekat
     {
         public SeriesCollection LineSeriesCollection { get; set; }
         public SeriesCollection ColumnSeriesCollection { get; set; }
-        public string[] LineLabels { get; set; }
-        public string[] ColumnLabels { get; set; }
+        public List<string> LineLabels { get; set; }
+        public List<string> ColumnLabels { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> Formatter { get; set; }
 
         private List<String> GDPIntervals = new List<String>() { "Quarterly", "Annual" };
-        private List<String> TreasuryIntervals = new List<String>() { "Daily", "Weekly", "Monthly"};
+        private List<String> TreasuryIntervals = new List<String>() { "Daily", "Weekly", "Monthly" };
 
         private DataHandler dataHandler = new DataHandler();
         private DataHandler.Data Data { get; set; }
@@ -65,6 +66,8 @@ namespace MiniProjekat
         public MainWindow()
         {
             InitializeComponent();
+            LineLabels = new List<string>();
+            ColumnLabels = new List<string>();
 
             List<String> dataReferences = new List<String>() { "GDP", "Treasury Yields" };
             dataReferencePicker.ItemsSource = dataReferences;
@@ -84,14 +87,14 @@ namespace MiniProjekat
                 DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());
                 var interval = ParseInterval(intervalPicker.SelectedValue.ToString());
 
-                startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?) null;
+                startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?)null;
                 endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now.Date;
 
                 Console.Out.WriteLine(dataReference + " " + interval);
                 Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
-                
+
                 var newSetttings = new Settings
                 {
                     DataReference = dataReference,
@@ -100,19 +103,20 @@ namespace MiniProjekat
                     End = endDate,
                 };
 
-                if(CurrentSettings == null || !newSetttings.Equals(CurrentSettings))
+                if (CurrentSettings == null || !newSetttings.Equals(CurrentSettings))
                 {
-                    ComputeData(dataReference, interval);
                     System.Diagnostics.Debug.Write($"{CurrentSettings} {newSetttings}");
                     CurrentSettings = newSetttings;
+                    ComputeData();
                     Clear();
                     DrawCharts();
                     UpdateTable(Data);
                 }
                 else
                 {
-                    if(LineSeriesCollection.Count == 0)
+                    if (LineSeriesCollection.Count == 0)
                     {
+                        Clear();
                         DrawCharts();
                         UpdateTable(Data);
                     }
@@ -128,19 +132,53 @@ namespace MiniProjekat
             }
         }
 
-        private void ComputeData(DataReference dataReference, Enum interval)
+        private void ComputeData()
         {
-            if (dataReference == DataReference.GDP)
+            if (CurrentSettings.DataReference == DataReference.GDP)
             {
-                Data = dataHandler.getGDP((GDP_INTERVAL)interval);
+                Data = dataHandler.getGDP((GDP_INTERVAL)CurrentSettings.Interval);
             }
             else
             {
-                Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)interval, TREASURY_MATURITY.M3);
+                Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, TREASURY_MATURITY.M3);
             }
 
+            FilterDataByDates();
+            Data.Values.Reverse();
+            Data.Dates.Reverse();
             Data.Values = Data.Values.Take(MAX_ENTRIES).ToList();
             Data.Dates = Data.Dates.Take(MAX_ENTRIES).ToList();
+            Data.Values.Reverse();
+            Data.Dates.Reverse();
+
+        }
+
+        private void FilterDataByDates()
+        {
+            var format = "yyyy-MM-dd";
+            var provider = CultureInfo.InvariantCulture;
+            Console.WriteLine($"{Data.Dates.Count()}");
+            var dates = Data.Dates.Select(x => DateTime.ParseExact(x, format, provider));
+            var values = Data.Values;
+            DateTime? startDate = CurrentSettings.Start == null ? DateTime.MinValue : CurrentSettings.Start;
+            DateTime? endDate = CurrentSettings.End == null ? DateTime.MaxValue : CurrentSettings.End;
+            Dictionary<DateTime, double> dict = dates.Zip(values, (k, v) => new { k, v })
+                                                     .ToDictionary(x => x.k, x => x.v);
+            Console.WriteLine("START END");
+            Console.WriteLine($"{startDate} {endDate}");
+            var filtered = dict.Where(x => x.Key >= startDate.Value && x.Key <= endDate.Value)
+                               .ToDictionary(x => x.Key, x => x.Value);
+            Console.WriteLine(filtered.Count());
+
+            var sortedFiltered = new SortedDictionary<DateTime, double>(filtered)
+                                 .OrderBy(x => x.Key);
+
+            Data.Values = sortedFiltered.Select(x => x.Value)
+                                        .ToList();
+            Data.Dates = sortedFiltered.Select(x => x.Key.ToString("yyyy-MM-dd"))
+                                       .ToList();
+
+            Console.WriteLine(Data.Dates.Count());
         }
 
         private void DrawCharts()
@@ -152,23 +190,18 @@ namespace MiniProjekat
 
         private void DrawColumnChart()
         {
-            SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
-            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
-            SolidColorBrush brushLight = (SolidColorBrush)new BrushConverter().ConvertFrom("#9caffc");
 
             var chartValues = new ChartValues<double>();
             var values = Data.Values;
             chartValues.AddRange(values);
 
-            if(ColumnSeriesCollection == null)
+            if (ColumnSeriesCollection == null)
                 ColumnSeriesCollection = new SeriesCollection();
-;
+            ;
             var series = new ColumnSeries
             {
                 Title = CurrentSettings.DataReference.ToString() + "\n" + CurrentSettings.Interval.ToString(),
                 Values = chartValues,
-                Stroke = brushLight,
-                Fill = brushLight,
                 StrokeThickness = 2,
             };
 
@@ -182,30 +215,23 @@ namespace MiniProjekat
                         .Y((value) => value)
                         .Fill((value, index) =>
                         {
-                            if ((value == maxValue) || (value == minValue))
-                                return brushMax;
-                            else
-                                return brushLight;
+                            return GetMinMaxBrush(value, maxValue, minValue);
                         })
                         .Stroke((value, index) =>
                         {
-                            if ((value == maxValue) || (value == minValue))
-                                return brushMax;
-                            else
-                                return brush;
+                            return GetMinMaxBrush(value, maxValue, minValue);
                         });
 
 
-            ColumnLabels = Data.Dates.ToArray();
+            ColumnLabels.AddRange(Data.Dates);
             Formatter = value => value.ToString("C");
         }
 
         private void DrawLineChart()
         {
-            SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
-            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
             
-            if(LineSeriesCollection == null)
+
+            if (LineSeriesCollection == null)
                 LineSeriesCollection = new SeriesCollection();
 
             var chartValues = new ChartValues<double>();
@@ -218,7 +244,6 @@ namespace MiniProjekat
                 Values = chartValues,
                 PointGeometry = DefaultGeometries.Square,
                 PointGeometrySize = 10,
-                Stroke = brush
             };
 
             LineSeriesCollection.Add(lineSeries);
@@ -231,24 +256,29 @@ namespace MiniProjekat
                         .Y((value) => value)
                         .Fill((value, index) =>
                         {
-                            if ((value == maxValue) || (value == minValue))
-                                return brushMax;
-                            else
-                                return brush;
+                            return GetMinMaxBrush(value, maxValue, minValue);
                         })
                         .Stroke((value, index) =>
                         {
-                            if ((value == maxValue) || (value == minValue))
-                                return brushMax;
-                            else
-                                return brush;
+                            return GetMinMaxBrush(value, maxValue, minValue);
                         });
             Charting.For<double>(mapper, SeriesOrientation.All);
-            LineLabels = Data.Dates.ToArray();
+            LineLabels.AddRange(Data.Dates);
             YFormatter = value => value.ToString("C");
         }
 
-
+        private static object GetMinMaxBrush(double value, double maxValue, double minValue)
+        {
+            SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
+            SolidColorBrush brushMin = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
+            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#90EE02");
+            if (value == maxValue)
+                return brushMax;
+            else if (value == minValue)
+                return brushMin;
+            else
+                return brush;
+        }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
@@ -258,6 +288,8 @@ namespace MiniProjekat
 
         private void Clear()
         {
+            LineLabels?.Clear();
+            ColumnLabels?.Clear();
             LineSeriesCollection?.Clear();
             ColumnSeriesCollection?.Clear();
         }
