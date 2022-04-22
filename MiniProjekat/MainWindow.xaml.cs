@@ -41,6 +41,8 @@ namespace MiniProjekat
         private Settings CurrentSettings { get; set; }
 
         private ZoomingOptions _zoomingMode;
+
+        private TableView tableView;
         public ZoomingOptions ZoomingMode
         {
             get { return _zoomingMode; }
@@ -105,14 +107,24 @@ namespace MiniProjekat
                     CurrentSettings = newSetttings;
                     Clear();
                     DrawCharts();
+                    UpdateTable(Data);
                 }
                 else
                 {
                     if(LineSeriesCollection.Count == 0)
                     {
                         DrawCharts();
+                        UpdateTable(Data);
                     }
                 }
+            }
+        }
+
+        private void UpdateTable(DataHandler.Data data)
+        {
+            if (tableView != null && Data != null)
+            {
+                tableView.Update(Data);
             }
         }
 
@@ -252,9 +264,24 @@ namespace MiniProjekat
 
         private void TableButton_Click(object sender, RoutedEventArgs e)
         {
-            // show table
+            if (Data == null || LineSeriesCollection == null || LineSeriesCollection.Count() == 0)
+            {
+                MessageBox.Show("Error: No data.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Console.Out.WriteLine("WINDOWS OPENED, ", App.Current.Windows.Count);
+                if (!Application.Current.Windows.Cast<Window>().Any(x => x == tableView))
+                {
+                    tableView = new TableView(Data);
+                    tableView.Show();
+                }
+                else
+                {
+                    MessageBox.Show("Error: Table View already opened.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
-
         private void UpdateIntervals(object sender, RoutedEventArgs e)
         {
             DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());

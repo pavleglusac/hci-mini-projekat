@@ -1,0 +1,47 @@
+﻿<Window x:Class="MiniProjekat.TableView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MiniProjekat"
+        Icon="icon.ico"
+        mc:Ignorable="d"
+        Title="GDP and Trasury Yields Visualizer - Table View" Height="576" Width="1024">
+
+    <Grid>
+        <DataGrid x:Name="table" CanUserSortColumns="True" Margin="12" AlternationCount="2" AlternatingRowBackground="AliceBlue">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Width="4*" Binding="{Binding Date}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Value" Width="3*" Binding="{Binding Value}" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMinValue}" Value="true">
+                                    <Setter Property="Background" Value="LightCoral"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsMaxValue}" Value="true">
+                                    <Setter Property="Background" Value="LightGreen"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+            <!-- BREAKS ON SORT???
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMinValue}" Value="true">
+                            <Setter Property="Background" Value="LightCoral"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsMaxValue}" Value="true">
+                            <Setter Property="Background" Value="LightGreen"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            -->
+        </DataGrid>
+    </Grid>
+    
+</Window>

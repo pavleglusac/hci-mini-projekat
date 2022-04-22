@@ -12,7 +12,7 @@ namespace MiniProjekat
 
     public enum TREASURY_MATURITY { M3, Y2, Y5, Y7, Y10, Y30 }
 
-    class DataHandler
+    public class DataHandler
     {
         private Dictionary<TREASURY_MATURITY, String> dict;
         public DataHandler()
