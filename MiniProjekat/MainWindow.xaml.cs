@@ -73,6 +73,10 @@ namespace MiniProjekat
             dataReferencePicker.ItemsSource = dataReferences;
             dataReferencePicker.SelectedIndex = 0;
 
+            List<String> treasuryMaturities = new List<String>() { "3 Month", "2 Year", "5 Year", "7 Year", "10 Year", "30 Year" };
+            maturityPicker.ItemsSource = treasuryMaturities;
+            maturityPicker.SelectedIndex = 0;
+
             intervalPicker.ItemsSource = GDPIntervals;
             intervalPicker.SelectedIndex = 0;
             ZoomingMode = ZoomingOptions.Xy;
@@ -86,15 +90,17 @@ namespace MiniProjekat
 
                 DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());
                 var interval = ParseInterval(intervalPicker.SelectedValue.ToString());
+                Console.Out.WriteLine(maturityPicker.SelectedValue.ToString());
+                var maturity = ParseMaturity(maturityPicker.SelectedValue.ToString());
 
                 startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?)null;
                 endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now.Date;
 
-                Console.Out.WriteLine(dataReference + " " + interval);
+                Console.Out.WriteLine(dataReference + " " + interval + " " + maturity);
                 Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
-                
+
                 if (startDate > endDate)
                 {
                     MessageBox.Show("Error: Start date can't be after end date.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -113,7 +119,7 @@ namespace MiniProjekat
                 {
                     System.Diagnostics.Debug.Write($"{CurrentSettings} {newSetttings}");
                     CurrentSettings = newSetttings;
-                    if(!ComputeData())
+                    if (!ComputeData())
                     {
                         return;
                     }
@@ -152,7 +158,7 @@ namespace MiniProjekat
                 Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, TREASURY_MATURITY.M3);
             }
 
-            if(Data == null)
+            if (Data == null)
             {
                 MessageBox.Show("Error: Too many requests. Try again in 60 seconds.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
@@ -237,7 +243,7 @@ namespace MiniProjekat
 
         private void DrawLineChart()
         {
-            
+
 
             if (LineSeriesCollection == null)
                 LineSeriesCollection = new SeriesCollection();
@@ -337,11 +343,13 @@ namespace MiniProjekat
             {
                 intervalPicker.ItemsSource = GDPIntervals;
                 intervalPicker.SelectedIndex = 0;
+                maturityItem.Visibility = Visibility.Visible;
             }
             else
             {
                 intervalPicker.ItemsSource = TreasuryIntervals;
                 intervalPicker.SelectedIndex = 0;
+                maturityItem.Visibility = Visibility.Collapsed;
             }
 
         }
@@ -354,6 +362,23 @@ namespace MiniProjekat
         {
             return text.ToLower().Contains("gdp") ? DataReference.GDP : DataReference.TREASURY;
         }
+
+        public TREASURY_MATURITY ParseMaturity(string text)
+        {
+            if (text.ToLower().Contains("3 month"))
+                return TREASURY_MATURITY.M3;
+            else if (text.ToLower().Contains("2 year"))
+                return TREASURY_MATURITY.Y2;
+            else if (text.ToLower().Contains("5 year"))
+                return TREASURY_MATURITY.Y5;
+            else if (text.ToLower().Contains("7 year"))
+                return TREASURY_MATURITY.Y7;
+            else if (text.ToLower().Contains("10 year"))
+                return TREASURY_MATURITY.Y10;
+            else
+                return TREASURY_MATURITY.Y30;
+        }
+
         public Enum ParseInterval(string text)
         {
             if (text.ToLower().Contains("daily"))

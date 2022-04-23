@@ -21,7 +21,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"></ColumnDefinition>
                 <ColumnDefinition Width="2*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -31,24 +31,34 @@
 
             <!-- ComboBoxes -->
 
-            <ComboBox Grid.Row="0" Grid.Column="0" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
+            <DockPanel Grid.Row="0" Grid.Column="0" Margin="0 3 0 3">
+                <Label Width="90" Margin="0 0 12 0" HorizontalAlignment="Left">Data reference:</Label>
+                <ComboBox Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
                   Background="White" IsEditable="True" IsReadOnly="True" Text="Data reference" x:Name="dataReferencePicker"
-                  SelectionChanged="UpdateIntervals">
-            </ComboBox>
-            <ComboBox Grid.Row="0" Grid.Column="1" Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
+                  SelectionChanged="UpdateIntervals"/>
+            </DockPanel>
+            <DockPanel Grid.Row="0" Grid.Column="1" Margin="0 3 0 3">
+                <Label Width="90" Margin="0 0 12 0" HorizontalAlignment="Left">Interval:</Label>
+                <ComboBox Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
                   Background="White" IsEditable="True" Text="Interval" x:Name="intervalPicker"/>
+            </DockPanel>
 
+            <DockPanel Grid.Row="0" Grid.Column="2" Margin="0 3 0 3" x:Name="maturityItem">
+                <Label Margin="0 0 12 0" HorizontalAlignment="Left">Maturity:</Label>
+                <ComboBox Margin="3" BorderBrush="Transparent" VerticalContentAlignment="Center"
+                  Background="White" IsEditable="True" Text="Treasury maturity" x:Name="maturityPicker"/>
+            </DockPanel>
 
             <!-- DatePickers -->
 
             <DockPanel Grid.Row="1" Grid.Column="0" Margin="3">
-                <Label Margin="0 0 12 0" HorizontalAlignment="Left">Start Date:</Label>
+                <Label Width="90" Margin="0 0 12 0" HorizontalAlignment="Left">Start Date:</Label>
                 <DatePicker Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center"
                     x:Name="startDatePicker" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             </DockPanel>
 
             <DockPanel Grid.Row="1" Grid.Column="1" Margin="3">
-                <Label Margin="0 0 12 0" HorizontalAlignment="Left">End Date:</Label>
+                <Label Width="90" Margin="0 0 12 0" HorizontalAlignment="Left">End Date:</Label>
                 <DatePicker Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" 
                     x:Name="endDatePicker" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
             </DockPanel>
