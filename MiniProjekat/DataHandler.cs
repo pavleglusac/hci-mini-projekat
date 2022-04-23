@@ -46,11 +46,11 @@ namespace MiniProjekat
                 }
                 foreach (var dateValuePair in json_data["data"])
                 {
-                    data.Dates.Add(dateValuePair["date"]);
                     if (!Double.TryParse(dateValuePair["value"], out value))
                     {
-                        value = 0;
+                        continue;
                     }
+                    data.Dates.Add(dateValuePair["date"]);
                     data.Values.Add(value);
                 }
                 return data;
@@ -75,11 +75,11 @@ namespace MiniProjekat
                 }
                 foreach (var dateValuePair in json_data["data"])
                 {
-                    data.Dates.Add(dateValuePair["date"]);
                     if (!Double.TryParse(dateValuePair["value"], out value))
                     {
-                        value = 0;
+                        continue;
                     }
+                    data.Dates.Add(dateValuePair["date"]);
                     data.Values.Add(value);
                 }
                 return data;
