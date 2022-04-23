@@ -94,6 +94,12 @@ namespace MiniProjekat
                 Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
+                
+                if (startDate > endDate)
+                {
+                    MessageBox.Show("Error: Start date can't be after end date.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
                 var newSetttings = new Settings
                 {
@@ -107,7 +113,10 @@ namespace MiniProjekat
                 {
                     System.Diagnostics.Debug.Write($"{CurrentSettings} {newSetttings}");
                     CurrentSettings = newSetttings;
-                    ComputeData();
+                    if(!ComputeData())
+                    {
+                        return;
+                    }
                     Clear();
                     DrawCharts();
                     UpdateTable(Data);
@@ -132,7 +141,7 @@ namespace MiniProjekat
             }
         }
 
-        private void ComputeData()
+        private bool ComputeData()
         {
             if (CurrentSettings.DataReference == DataReference.GDP)
             {
@@ -143,6 +152,12 @@ namespace MiniProjekat
                 Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, TREASURY_MATURITY.M3);
             }
 
+            if(Data == null)
+            {
+                MessageBox.Show("Error: Too many requests. Try again in 60 seconds.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
             FilterDataByDates();
             Data.Values.Reverse();
             Data.Dates.Reverse();
@@ -150,7 +165,7 @@ namespace MiniProjekat
             Data.Dates = Data.Dates.Take(MAX_ENTRIES).ToList();
             Data.Values.Reverse();
             Data.Dates.Reverse();
-
+            return true;
         }
 
         private void FilterDataByDates()
