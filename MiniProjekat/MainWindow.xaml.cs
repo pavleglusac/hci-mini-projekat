@@ -157,28 +157,21 @@ namespace MiniProjekat
         {
             var format = "yyyy-MM-dd";
             var provider = CultureInfo.InvariantCulture;
-            Console.WriteLine($"{Data.Dates.Count()}");
             var dates = Data.Dates.Select(x => DateTime.ParseExact(x, format, provider));
             var values = Data.Values;
             DateTime? startDate = CurrentSettings.Start == null ? DateTime.MinValue : CurrentSettings.Start;
             DateTime? endDate = CurrentSettings.End == null ? DateTime.MaxValue : CurrentSettings.End;
             Dictionary<DateTime, double> dict = dates.Zip(values, (k, v) => new { k, v })
                                                      .ToDictionary(x => x.k, x => x.v);
-            Console.WriteLine("START END");
-            Console.WriteLine($"{startDate} {endDate}");
+
             var filtered = dict.Where(x => x.Key >= startDate.Value && x.Key <= endDate.Value)
                                .ToDictionary(x => x.Key, x => x.Value);
             Console.WriteLine(filtered.Count());
 
-            var sortedFiltered = new SortedDictionary<DateTime, double>(filtered)
-                                 .OrderBy(x => x.Key);
+            var sortedFiltered = new SortedDictionary<DateTime, double>(filtered).OrderBy(x => x.Key);
 
-            Data.Values = sortedFiltered.Select(x => x.Value)
-                                        .ToList();
-            Data.Dates = sortedFiltered.Select(x => x.Key.ToString("yyyy-MM-dd"))
-                                       .ToList();
-
-            Console.WriteLine(Data.Dates.Count());
+            Data.Values = sortedFiltered.Select(x => x.Value).ToList();
+            Data.Dates = sortedFiltered.Select(x => x.Key.ToString("yyyy-MM-dd")).ToList();
         }
 
         private void DrawCharts()
@@ -288,6 +281,14 @@ namespace MiniProjekat
 
         private void Clear()
         {
+            X1.MinValue = double.NaN;
+            X1.MaxValue = double.NaN;
+            Y1.MinValue = double.NaN;
+            Y1.MaxValue = double.NaN;
+            X2.MinValue = double.NaN;
+            X2.MaxValue = double.NaN;
+            Y2.MinValue = double.NaN;
+            Y2.MaxValue = double.NaN;
             LineLabels?.Clear();
             ColumnLabels?.Clear();
             LineSeriesCollection?.Clear();
