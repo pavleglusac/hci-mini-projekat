@@ -54,7 +54,7 @@ namespace MiniProjekat
             }
         }
 
-        private readonly int MAX_ENTRIES = 20;
+        private readonly int MAX_ENTRIES = 25;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -94,7 +94,7 @@ namespace MiniProjekat
                 var maturity = ParseMaturity(maturityPicker.SelectedValue.ToString());
 
                 startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?)null;
-                endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : DateTime.Now.Date;
+                endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : (DateTime?)null;
 
                 Console.Out.WriteLine(dataReference + " " + interval + " " + maturity);
                 Console.Out.WriteLine(startDate + " " + endDate);
@@ -113,6 +113,7 @@ namespace MiniProjekat
                     Interval = interval,
                     Start = startDate,
                     End = endDate,
+                    Maturity = maturity
                 };
 
                 if (CurrentSettings == null || !newSetttings.Equals(CurrentSettings))
@@ -123,6 +124,10 @@ namespace MiniProjekat
                     {
                         return;
                     }
+                    if(Data.Values.Count == 0)
+                    {
+                        MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                     Clear();
                     DrawCharts();
                     UpdateTable(Data);
@@ -131,6 +136,10 @@ namespace MiniProjekat
                 {
                     if (LineSeriesCollection.Count == 0)
                     {
+                        if (Data.Values.Count == 0)
+                        {
+                            MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                         Clear();
                         DrawCharts();
                         UpdateTable(Data);
@@ -155,7 +164,7 @@ namespace MiniProjekat
             }
             else
             {
-                Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, TREASURY_MATURITY.M3);
+                Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, CurrentSettings.Maturity);
             }
 
             if (Data == null)
@@ -197,6 +206,8 @@ namespace MiniProjekat
 
         private void DrawCharts()
         {
+            SeparatorLine.Step = Math.Max(Data.Values.Count / 5, 1);
+            SeparatorColumn.Step = Math.Max(Data.Values.Count / 5, 1);
             DrawLineChart();
             DrawColumnChart();
             DataContext = this;
@@ -204,6 +215,8 @@ namespace MiniProjekat
 
         private void DrawColumnChart()
         {
+            SolidColorBrush brushMin = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
+            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#90EE02");
 
             var chartValues = new ChartValues<double>();
             var values = Data.Values;
@@ -219,7 +232,25 @@ namespace MiniProjekat
                 StrokeThickness = 2,
             };
 
+            var minSeries = new ColumnSeries
+            {
+                Title = "MIN. VAL.",
+                Stroke = brushMin,
+                Fill = brushMin,
+                Values = new ChartValues<double>(),
+            };
+
+            var maxSeries = new ColumnSeries
+            {
+                Title = "MAX. VAL.",
+                Stroke = brushMax,
+                Fill = brushMax,
+                Values = new ChartValues<double>(),
+            };
+
             ColumnSeriesCollection.Add(series);
+            ColumnSeriesCollection.Add(minSeries);
+            ColumnSeriesCollection.Add(maxSeries);
 
             double maxValue = values.Count() > 0 ? values.Max() : 0;
             double minValue = values.Count() > 0 ? values.Min() : 0;
@@ -244,6 +275,9 @@ namespace MiniProjekat
         private void DrawLineChart()
         {
 
+            SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
+            SolidColorBrush brushMin = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
+            SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#90EE02");
 
             if (LineSeriesCollection == null)
                 LineSeriesCollection = new SeriesCollection();
@@ -258,9 +292,35 @@ namespace MiniProjekat
                 Values = chartValues,
                 PointGeometry = DefaultGeometries.Square,
                 PointGeometrySize = 10,
+                PointForeground = brush
+            };
+
+            var minSeries = new LineSeries
+            {
+                Title = "MIN. VAL.",
+                Stroke = brushMin,
+                Fill = brushMin,
+                PointGeometry = DefaultGeometries.Square,
+                PointGeometrySize = 10,
+                PointForeground = brushMin,
+                Values = new ChartValues<double>(),
+            };
+
+            var maxSeries = new LineSeries
+            {
+                Title = "MAX. VAL.",
+                Stroke = brushMax,
+                Fill = brushMax,
+                PointGeometry = DefaultGeometries.Square,
+                PointGeometrySize = 10,
+                PointForeground = brushMax,
+                Values = new ChartValues<double>(),
             };
 
             LineSeriesCollection.Add(lineSeries);
+            LineSeriesCollection.Add(maxSeries);
+            LineSeriesCollection.Add(minSeries);
+
 
             double maxValue = values.Count() > 0 ? values.Max() : 0;
             double minValue = values.Count() > 0 ? values.Min() : 0;
@@ -343,13 +403,13 @@ namespace MiniProjekat
             {
                 intervalPicker.ItemsSource = GDPIntervals;
                 intervalPicker.SelectedIndex = 0;
-                maturityItem.Visibility = Visibility.Visible;
+                maturityItem.Visibility = Visibility.Collapsed;
             }
             else
             {
                 intervalPicker.ItemsSource = TreasuryIntervals;
                 intervalPicker.SelectedIndex = 0;
-                maturityItem.Visibility = Visibility.Collapsed;
+                maturityItem.Visibility = Visibility.Visible;
             }
 
         }
@@ -399,6 +459,7 @@ namespace MiniProjekat
             public DataReference DataReference { get; set; }
             public DateTime? Start { get; set; }
             public DateTime? End { get; set; }
+            public TREASURY_MATURITY Maturity { get; set; }
 
             public override bool Equals(object obj)
             {
@@ -406,12 +467,13 @@ namespace MiniProjekat
                        EqualityComparer<Enum>.Default.Equals(Interval, settings.Interval) &&
                        DataReference == settings.DataReference &&
                        Start == settings.Start &&
-                       End == settings.End;
+                       End == settings.End &&
+                       Maturity == settings.Maturity;
             }
 
             public override string ToString()
             {
-                return $"{Interval} {DataReference} {Start} {End}";
+                return base.ToString();
             }
         }
 

@@ -101,7 +101,7 @@
                 <lvc:CartesianChart.AxisX>
                     <lvc:Axis Name="X1" Title="Date" Labels="{Binding LineLabels}">
                         <lvc:Axis.Separator>
-                            <lvc:Separator Step="5" />
+                            <lvc:Separator Name="SeparatorLine" Step="5" />
                         </lvc:Axis.Separator>
                     </lvc:Axis>
                 </lvc:CartesianChart.AxisX>
@@ -113,7 +113,7 @@
                 <lvc:CartesianChart.AxisX>
                     <lvc:Axis Name="X2" Title="Date" Labels="{Binding ColumnLabels}">
                         <lvc:Axis.Separator>
-                            <lvc:Separator Step="5" />
+                            <lvc:Separator Name="SeparatorColumn" Step="5" />
                         </lvc:Axis.Separator>
                     </lvc:Axis>
                 </lvc:CartesianChart.AxisX>
