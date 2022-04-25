@@ -291,7 +291,7 @@ namespace MiniProjekat
                 if (CurrentSettings == null || CurrentSettings.Interval == null)
                     return value.ToString();
                 if (CurrentSettings.Interval.GetType() == typeof(GDP_INTERVAL))
-                    return value.ToString("C");
+                    return value.ToString() + "B$";
                 else
                     return value.ToString() + "%";
             };
@@ -368,7 +368,7 @@ namespace MiniProjekat
                 if (CurrentSettings == null || CurrentSettings.Interval == null)
                     return value.ToString();
                 if (CurrentSettings.Interval.GetType() == typeof(GDP_INTERVAL))
-                    return value.ToString("C");
+                    return value.ToString() + "B$";
                 else
                     return value.ToString() + "%";
             };
