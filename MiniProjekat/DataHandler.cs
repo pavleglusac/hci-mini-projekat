@@ -14,6 +14,8 @@ namespace MiniProjekat
 
     public class DataHandler
     {
+        public string Units { get; set; }
+
         private Dictionary<TREASURY_MATURITY, String> dict;
         public DataHandler()
         {
@@ -44,6 +46,7 @@ namespace MiniProjekat
                 {
                     return null;
                 }
+                Units = json_data["unit"];
                 foreach (var dateValuePair in json_data["data"])
                 {
                     if (!Double.TryParse(dateValuePair["value"], out value))
@@ -73,6 +76,7 @@ namespace MiniProjekat
                 {
                     return null;
                 }
+                Units = json_data["unit"];
                 foreach (var dateValuePair in json_data["data"])
                 {
                     if (!Double.TryParse(dateValuePair["value"], out value))

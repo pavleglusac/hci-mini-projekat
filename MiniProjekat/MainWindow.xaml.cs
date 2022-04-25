@@ -123,7 +123,6 @@ namespace MiniProjekat
                     if(Data.Values.Count == 0)
                     {
                         MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                        Clear();
                         return;
                     }
                     Clear();
@@ -138,6 +137,7 @@ namespace MiniProjekat
                         {
                             if(!ComputeData())
                             {
+                                Clear();
                                 return;
                             }
                         }
@@ -173,6 +173,8 @@ namespace MiniProjekat
             {
                 Data = dataHandler.getTreasuryYield((TREASURY_INTERVAL)CurrentSettings.Interval, CurrentSettings.Maturity);
             }
+            Y1.Title = (dataHandler.Units == null ? "" : dataHandler.Units);
+            Y2.Title = (dataHandler.Units == null ? "" : dataHandler.Units);
 
             if (Data == null)
             {
@@ -397,6 +399,7 @@ namespace MiniProjekat
                 if (!Application.Current.Windows.Cast<Window>().Any(x => x == tableView))
                 {
                     tableView = new TableView(Data);
+                    tableView.TableUnits.Header = (dataHandler.Units == null ? "" : dataHandler.Units);
                     tableView.Show();
                 }
                 else

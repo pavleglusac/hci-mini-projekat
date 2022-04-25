@@ -12,7 +12,7 @@
         <DataGrid x:Name="table" CanUserSortColumns="True" Margin="12" AlternationCount="2" AlternatingRowBackground="AliceBlue">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Date" Width="4*" Binding="{Binding Date}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Value" Width="3*" Binding="{Binding Value}" IsReadOnly="True">
+                <DataGridTextColumn x:Name="TableUnits" Header="Value" Width="3*" Binding="{Binding Value}" IsReadOnly="True">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Style.Triggers>
