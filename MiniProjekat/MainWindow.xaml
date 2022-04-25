@@ -126,12 +126,12 @@
         </Grid>
         
         <!-- Table Button -->
-        <StackPanel Orientation="Horizontal" Margin="0 4" Grid.Row="2" HorizontalAlignment="Center">
-            <Button Content="Show table" Margin="2" Padding="36 0" Height="30"
+        <StackPanel Orientation="Horizontal" Margin="10" Grid.Row="2" HorizontalAlignment="Right">
+            <Button Content="Show table" Margin="2" Padding="36 0" Height="32"
                 Background="#5a7bfb" BorderBrush="Transparent"
                 Foreground="White" x:Name="TableButton" Click="TableButton_Click">
                 <Button.Resources>
-                    <Style TargetType="Border">
+                    <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="5"/>
                     </Style>
                 </Button.Resources>

@@ -127,6 +127,8 @@ namespace MiniProjekat
                     if(Data.Values.Count == 0)
                     {
                         MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        Clear();
+                        return;
                     }
                     Clear();
                     DrawCharts();
@@ -139,6 +141,8 @@ namespace MiniProjekat
                         if (Data.Values.Count == 0)
                         {
                             MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                            Clear();
+                            return;
                         }
                         Clear();
                         DrawCharts();
@@ -215,6 +219,7 @@ namespace MiniProjekat
 
         private void DrawColumnChart()
         {
+            SolidColorBrush brush = (SolidColorBrush)new BrushConverter().ConvertFrom("#5a7bfb");
             SolidColorBrush brushMin = (SolidColorBrush)new BrushConverter().ConvertFrom("#E53935");
             SolidColorBrush brushMax = (SolidColorBrush)new BrushConverter().ConvertFrom("#90EE02");
 
@@ -230,6 +235,7 @@ namespace MiniProjekat
                 Title = CurrentSettings.DataReference.ToString() + "\n" + CurrentSettings.Interval.ToString(),
                 Values = chartValues,
                 StrokeThickness = 2,
+                PointGeometry = DefaultGeometries.Square
             };
 
             var minSeries = new ColumnSeries
@@ -238,6 +244,7 @@ namespace MiniProjekat
                 Stroke = brushMin,
                 Fill = brushMin,
                 Values = new ChartValues<double>(),
+                PointGeometry = DefaultGeometries.Square
             };
 
             var maxSeries = new ColumnSeries
@@ -246,6 +253,7 @@ namespace MiniProjekat
                 Stroke = brushMax,
                 Fill = brushMax,
                 Values = new ChartValues<double>(),
+                PointGeometry = DefaultGeometries.Square
             };
 
             ColumnSeriesCollection.Add(series);
@@ -378,7 +386,7 @@ namespace MiniProjekat
 
         private void TableButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Data == null || LineSeriesCollection == null || LineSeriesCollection.Count() == 0)
+            if (Data == null || LineSeriesCollection == null || LineSeriesCollection.Count() == 0 || Data.Values.Count == 0)
             {
                 MessageBox.Show("Error: No data.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
