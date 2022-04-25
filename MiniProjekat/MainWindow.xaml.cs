@@ -179,6 +179,7 @@ namespace MiniProjekat
             if (Data == null)
             {
                 MessageBox.Show("Error: Too many requests. Try again in 60 seconds.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                CurrentSettings = null;
                 return false;
             }
 
