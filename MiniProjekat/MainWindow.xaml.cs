@@ -90,14 +90,10 @@ namespace MiniProjekat
 
                 DataReference dataReference = ParseDataReference(dataReferencePicker.SelectedValue.ToString());
                 var interval = ParseInterval(intervalPicker.SelectedValue.ToString());
-                Console.Out.WriteLine(maturityPicker.SelectedValue.ToString());
                 var maturity = ParseMaturity(maturityPicker.SelectedValue.ToString());
 
                 startDate = startDatePicker.SelectedDate != null ? startDatePicker.SelectedDate.Value.Date : (DateTime?)null;
                 endDate = endDatePicker.SelectedDate != null ? endDatePicker.SelectedDate.Value.Date : (DateTime?)null;
-
-                Console.Out.WriteLine(dataReference + " " + interval + " " + maturity);
-                Console.Out.WriteLine(startDate + " " + endDate);
 
                 // fill charts
 
@@ -138,6 +134,13 @@ namespace MiniProjekat
                 {
                     if (LineSeriesCollection.Count == 0)
                     {
+                        if(Data == null || Data.Values == null)
+                        {
+                            if(!ComputeData())
+                            {
+                                return;
+                            }
+                        }
                         if (Data.Values.Count == 0)
                         {
                             MessageBox.Show("No data", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -200,7 +203,6 @@ namespace MiniProjekat
 
             var filtered = dict.Where(x => x.Key >= startDate.Value && x.Key <= endDate.Value)
                                .ToDictionary(x => x.Key, x => x.Value);
-            Console.WriteLine(filtered.Count());
 
             var sortedFiltered = new SortedDictionary<DateTime, double>(filtered).OrderBy(x => x.Key);
 
@@ -210,8 +212,8 @@ namespace MiniProjekat
 
         private void DrawCharts()
         {
-            SeparatorLine.Step = Math.Max(Data.Values.Count / 5, 1);
-            SeparatorColumn.Step = Math.Max(Data.Values.Count / 5, 1);
+            SeparatorLine.Step = Math.Max(Data.Values.Count / 3, 1);
+            SeparatorColumn.Step = Math.Max(Data.Values.Count / 3, 1);
             DrawLineChart();
             DrawColumnChart();
             DataContext = this;
@@ -326,8 +328,8 @@ namespace MiniProjekat
             };
 
             LineSeriesCollection.Add(lineSeries);
-            LineSeriesCollection.Add(maxSeries);
             LineSeriesCollection.Add(minSeries);
+            LineSeriesCollection.Add(maxSeries);
 
 
             double maxValue = values.Count() > 0 ? values.Max() : 0;
@@ -392,7 +394,6 @@ namespace MiniProjekat
             }
             else
             {
-                Console.Out.WriteLine("WINDOWS OPENED, ", App.Current.Windows.Count);
                 if (!Application.Current.Windows.Cast<Window>().Any(x => x == tableView))
                 {
                     tableView = new TableView(Data);
