@@ -69,6 +69,8 @@ namespace MiniProjekat
             LineLabels = new List<string>();
             ColumnLabels = new List<string>();
 
+            EntriesLabel.Content =  $"*max shown entries: {MAX_ENTRIES}";
+
             List<String> dataReferences = new List<String>() { "GDP", "Treasury Yields" };
             dataReferencePicker.ItemsSource = dataReferences;
             dataReferencePicker.SelectedIndex = 0;
@@ -183,6 +185,7 @@ namespace MiniProjekat
                 return false;
             }
 
+
             FilterDataByDates();
             Data.Values.Reverse();
             Data.Dates.Reverse();
@@ -282,7 +285,16 @@ namespace MiniProjekat
 
 
             ColumnLabels.AddRange(Data.Dates);
-            Formatter = value => value.ToString("C");
+
+            Formatter = (value) =>
+            {
+                if (CurrentSettings == null || CurrentSettings.Interval == null)
+                    return value.ToString();
+                if (CurrentSettings.Interval.GetType() == typeof(GDP_INTERVAL))
+                    return value.ToString("C");
+                else
+                    return value.ToString() + "%";
+            };
         }
 
         private void DrawLineChart()
@@ -351,7 +363,15 @@ namespace MiniProjekat
                         });
             Charting.For<double>(mapper, SeriesOrientation.All);
             LineLabels.AddRange(Data.Dates);
-            YFormatter = value => value.ToString("C");
+            YFormatter = (value) =>
+            {
+                if (CurrentSettings == null || CurrentSettings.Interval == null)
+                    return value.ToString();
+                if (CurrentSettings.Interval.GetType() == typeof(GDP_INTERVAL))
+                    return value.ToString("C");
+                else
+                    return value.ToString() + "%";
+            };
         }
 
         private static object GetMinMaxBrush(double value, double maxValue, double minValue)

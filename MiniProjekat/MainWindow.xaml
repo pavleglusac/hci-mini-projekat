@@ -83,6 +83,7 @@
                     </Style>
                 </Button.Resources>
             </Button>
+            <Label x:Name="EntriesLabel" Grid.Column="2" Content="Max. entries" HorizontalAlignment="Left" Margin="4,0,0,0" Grid.Row="1" VerticalAlignment="Center"/>
         </Grid>
 
         <!-- Charts -->

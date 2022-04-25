@@ -39,7 +39,7 @@ namespace MiniProjekat
                 table.Items.Add(new DataItem
                 {
                     Date = data.Dates[i],
-                    Value = data.Values[i].ToString()
+                    Value = data.Values[i]
                 });
             }
         }
@@ -61,9 +61,9 @@ namespace MiniProjekat
     public class DataItem
     {
         public string Date { get; set; }
-        public string Value { get; set; }
-        public bool IsMaxValue { get { return Value == TableView.maxValue; } }
-        public bool IsMinValue { get { return Value == TableView.minValue; } }
+        public double Value { get; set; }
+        public bool IsMaxValue { get { return Value.ToString() == TableView.maxValue; } }
+        public bool IsMinValue { get { return Value.ToString() == TableView.minValue; } }
 
     }
 }

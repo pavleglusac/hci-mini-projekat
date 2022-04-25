@@ -47,6 +47,7 @@ namespace MiniProjekat
                     return null;
                 }
                 Units = json_data["unit"];
+                Units = Units[0].ToString().ToUpper() + Units.Substring(1);
                 foreach (var dateValuePair in json_data["data"])
                 {
                     if (!Double.TryParse(dateValuePair["value"], out value))
@@ -77,6 +78,7 @@ namespace MiniProjekat
                     return null;
                 }
                 Units = json_data["unit"];
+                Units = Units[0].ToString().ToUpper() + Units.Substring(1);
                 foreach (var dateValuePair in json_data["data"])
                 {
                     if (!Double.TryParse(dateValuePair["value"], out value))
